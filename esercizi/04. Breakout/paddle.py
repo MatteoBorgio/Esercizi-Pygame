@@ -1,12 +1,10 @@
 import pygame
 
-
 PADDLE_W      = 100
 PADDLE_H      =  14
 PADDLE_COLOR  = ( 80, 180, 220)
 PADDLE_SPEED  =   6
 PADDLE_Y_OFFSET = 60   # distanza dal bordo inferiore dello schermo
-
 
 class Paddle:
     """

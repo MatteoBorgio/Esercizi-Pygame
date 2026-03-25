@@ -29,7 +29,6 @@ class Ball:
 
     def update(self, screen_w: int, screen_h: int):
         """
-        TODO — Aggiorna posizione e gestisce i rimbalzi.
 
         Ogni frame:
         1. Somma vel_x a x e vel_y a y.
@@ -49,11 +48,31 @@ class Ball:
 
         Nota: il bordo Sud non fa rimbalzare — lo gestisce il gioco.
         """
-        raise NotImplementedError
+
+        self.x += self.vel_x
+        self.y += self.vel_y
+
+        # Bordo sinistro
+        if self.x - BALL_RADIUS <= 0:
+            self.x = BALL_RADIUS
+            self.vel_x = - self.vel_x
+
+        # Bordo destro
+        if self.x + BALL_RADIUS >= screen_w:
+            self.x = screen_w - BALL_RADIUS
+            self.vel_x = -self.vel_x
+
+        # Bordo inferiore
+        if self.y - BALL_RADIUS <= 0:
+            self.y = BALL_RADIUS
+            self.vel_y = - self.vel_y
+
+        # Bordo superiore
+        if self.y - BALL_RADIUS >= screen_h:
+            self.alive = False
 
     def bounce_off_paddle(self, paddle_rect: pygame.Rect):
         """
-        TODO — Gestisce il rimbalzo sulla paddle.
 
         Condizioni per il rimbalzo (devono essere vere entrambe):
           a) La pallina sta scendendo (vel_y > 0).
@@ -79,14 +98,19 @@ class Ball:
             Questo rende il rimbalzo più interessante: colpire il
             bordo sinistro manda la pallina a sinistra e viceversa.
         """
-        raise NotImplementedError
+        ball_rect = pygame.Rect(self.x - BALL_RADIUS, self.y - BALL_RADIUS, BALL_RADIUS * 2, BALL_RADIUS * 2)
+
+        if self.vel_y > 0 and ball_rect.colliderect(paddle_rect):
+            self.vel_y = - self.vel_y
+            self.y = paddle_rect.top - BALL_RADIUS
+            offset = self.x - paddle_rect.centerx
+            self.vel_x = offset // 10
 
     def draw(self, surface: pygame.Surface):
         """
-        TODO — Disegna la pallina come cerchio pieno.
 
         Usa pygame.draw.circle() con BALL_COLOR e BALL_RADIUS.
         Ricorda che pygame.draw.circle accetta il centro come
         tupla di interi: (int(self.x), int(self.y)).
         """
-        raise NotImplementedError
+        pygame.draw.circle(surface, BALL_COLOR, (int(self.x), int(self.y)), BALL_RADIUS, BALL_RADIUS ** 2)
