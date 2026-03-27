@@ -206,11 +206,17 @@ Se la pallina colpisce il bordo sinistro della paddle, `offset` è negativo e `v
 ## Domande di comprensione
 
 1. Cosa succederebbe se `Ball.update()` chiamasse internamente `pygame.key.get_pressed()` invece di ricevere i parametri dall'esterno?
+La pallina diventerebbe dipendente dal da pygame e dall'input da tastiera, e non sarebbe più riutilizzabile in altri contesti, causando un problema nella gestione delle responsabilità.
 2. Perché `alive` è un attributo di `Ball` e non una variabile in `main.py`?
+Perchè rappresenta lo stato interno della pallina, indipendente dal ciclo principale.
 3. `reset_game()` restituisce una tupla. Potresti usare un dizionario? Quali sarebbero i pro e i contro?
+Con il dizionario l'assegnazione sarebbe più chiara perchè indentificherebbe con il nome i parametri. Con la tupla però l'assegnazione è più semplice, anche se segue un'assegnazione rigida. 
 4. Perché controlliamo `vel_y > 0` prima di verificare la collisione con la paddle?
+Senza questa condizione la pallina potrebbe rimbalzare anche mentre sale, se le due hitbox si sovrappongono per un frame. Controllare che stia scendendo evita il problema.
 5. Cosa succede se rimuovi la correzione della posizione `self.y = paddle_rect.top - BALL_RADIUS` nel rimbalzo? Prova a immaginarlo prima di testarlo.
+La pallina non viene spostata esattamente sopra il paddle dopo la collisione, dando l'impressione di rimbalzare all'interno della paddle.
 6. Il loop chiama `ball.update()` e poi `ball.bounce_off_paddle()`. Cosa succederebbe se li invertissimo?
+Perchè in questo modo prima viene aggiornata la posizione, poi viene considerato il rimbalzo. Altrimenti il rimbalzo avverrebbe in ritardo.
 
 ---
 

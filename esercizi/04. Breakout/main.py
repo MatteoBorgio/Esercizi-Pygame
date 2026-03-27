@@ -136,7 +136,6 @@ def draw_end_screen(surface: pygame.Surface, won: bool):
 
 def reset_game():
     """
-    TODO — Crea e restituisce lo stato iniziale della partita:
     (ball, paddle, start_time, lives).
 
     - ball:       nuova istanza di Ball, centrata orizzontalmente
