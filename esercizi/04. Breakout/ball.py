@@ -23,6 +23,10 @@ class Ball:
         self.vel_y = BALL_SPEED_Y
         self.alive = True
 
+    @property
+    def ball_rect(self):
+        return pygame.Rect(self.x - BALL_RADIUS, self.y - BALL_RADIUS, BALL_RADIUS * 2, BALL_RADIUS * 2)
+
     # ---------------------------------------------------------------- #
     # Metodi da implementare                                            #
     # ---------------------------------------------------------------- #
@@ -71,6 +75,12 @@ class Ball:
         if self.y - BALL_RADIUS >= screen_h:
             self.alive = False
 
+    def bounce_off_obstacle(self, obstacle_rect: pygame.Rect):
+        self.vel_y = - self.vel_y
+        self.y = obstacle_rect.top - BALL_RADIUS
+        offset = self.x - obstacle_rect.centerx
+        self.vel_x = offset // 10
+
     def bounce_off_paddle(self, paddle_rect: pygame.Rect):
         """
 
@@ -98,9 +108,7 @@ class Ball:
             Questo rende il rimbalzo più interessante: colpire il
             bordo sinistro manda la pallina a sinistra e viceversa.
         """
-        ball_rect = pygame.Rect(self.x - BALL_RADIUS, self.y - BALL_RADIUS, BALL_RADIUS * 2, BALL_RADIUS * 2)
-
-        if self.vel_y > 0 and ball_rect.colliderect(paddle_rect):
+        if self.vel_y > 0 and self.ball_rect.colliderect(paddle_rect):
             self.vel_y = - self.vel_y
             self.y = paddle_rect.top - BALL_RADIUS
             offset = self.x - paddle_rect.centerx

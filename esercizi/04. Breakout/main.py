@@ -1,6 +1,7 @@
 import pygame
 import sys
 import time
+from obstacle import Obstacle
 
 from ball   import Ball
 from paddle import Paddle
@@ -13,7 +14,7 @@ SCREEN_W  = 800
 SCREEN_H  = 600
 FPS       = 60
 
-COUNTDOWN = 60        # secondi per vincere
+COUNTDOWN = 120       # secondi per vincere
 MAX_LIVES =  3        # vite iniziali
 
 BG_COLOR      = ( 20,  20,  40)
@@ -130,6 +131,30 @@ def draw_end_screen(surface: pygame.Surface, won: bool):
     hint = font_medium.render("Premi R per rigiocare", True, TEXT_COLOR)
     surface.blit(hint, hint.get_rect(center=(SCREEN_W // 2, SCREEN_H // 2 + 40)))
 
+def create_obstacle():
+    obstacles = []
+
+    rows = 4
+    cols = 10
+    margin_top = 80
+    spacing = 4
+    height = 25
+
+    total_spacing = (cols + 1) * spacing
+    width = (SCREEN_W - total_spacing) // cols
+
+    for row in range(rows):
+        color = (220 - (row * 30), 100 + (row * 20), 80)
+        for col in range(cols):
+            x = spacing + col * (width + spacing)
+            y = margin_top + row * (height + spacing)
+
+            obs = Obstacle((x, y), color, (width, height))
+            obstacles.append(obs)
+
+    return obstacles
+            
+
 # ------------------------------------------------------------------ #
 # FUNZIONE — reset partita                                             #
 # ------------------------------------------------------------------ #
@@ -143,6 +168,8 @@ def reset_game():
     - paddle:     nuova istanza di Paddle.
     - start_time: timestamp attuale (time.time()).
     - lives:      MAX_LIVES.
+    - obstacles:  resetta gli ostacoli sullo schermo creando
+                  una nuova lista di Obstacle
 
     Restituisci una tupla: (ball, paddle, start_time, lives)
     """
@@ -151,7 +178,8 @@ def reset_game():
     paddle = Paddle(SCREEN_W, SCREEN_H)
     start_time = time.time()
     lives = MAX_LIVES
-    return ball, paddle, start_time, lives
+    obstacles = create_obstacle()
+    return ball, paddle, start_time, lives, obstacles
 
 # ------------------------------------------------------------------ #
 # LOOP PRINCIPALE                                                      #
@@ -162,7 +190,7 @@ def reset_game():
 #   ball, paddle, start_time, lives = reset_game()
 #
 # Poi dichiara: game_over = False
-ball, paddle, start_time, lives = reset_game()
+ball, paddle, start_time, lives, obstacles = reset_game()
 game_over = False
 running = True
 
@@ -179,7 +207,7 @@ while running:
         # incluso game_over = False.
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:
-                ball, paddle, start_time, lives = reset_game()
+                ball, paddle, start_time, lives, obstacles = reset_game()
                 game_over = False
 
     # ---- 2. AGGIORNA ---------------------------------------------- #
@@ -208,6 +236,13 @@ while running:
         paddle.update(keys)
         ball.update(SCREEN_W, SCREEN_H)
         ball.bounce_off_paddle(paddle.rect)
+
+        for obs in obstacles:
+            if obs.active and ball.ball_rect.colliderect(obs.rect):
+                obs.hit()
+                ball.vel_y = -ball.vel_y
+                break
+
         if not ball.alive:
             lives -= 1
             if lives > 0:
@@ -216,7 +251,15 @@ while running:
                 game_over = True
         if is_expired(start_time, COUNTDOWN):
             game_over = True
-        won = is_expired(start_time, COUNTDOWN) and lives > 0
+
+        active_obs = 0
+        for obs in obstacles:
+            if obs.active:
+                active_obs += 1
+
+        if active_obs == 0:
+            game_over = True
+    won = lives > 0
 
     # ---- 3. DISEGNA ----------------------------------------------- #
 
@@ -232,6 +275,8 @@ while running:
 
     paddle.draw(screen)
     ball.draw(screen)
+    for obs in obstacles:
+        obs.draw(screen)
 
     if game_over:
         draw_end_screen(screen, won)
