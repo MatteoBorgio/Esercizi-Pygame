@@ -231,7 +231,15 @@ while running:
     #
     # Suggerimento: won = is_expired(start_time, COUNTDOWN) and lives > 0
     # ti serve per sapere se mostrare "Hai vinto" o "Hai perso".
+
+    active_obs = 0
+    for obs in obstacles:
+        if obs.active:
+            active_obs += 1
+
     if not game_over:
+        remaining = time_remaining(start_time, COUNTDOWN)
+        draw_timer_bar(screen, remaining, COUNTDOWN)
         keys = pygame.key.get_pressed()
         paddle.update(keys)
         ball.update(SCREEN_W, SCREEN_H)
@@ -252,14 +260,10 @@ while running:
         if is_expired(start_time, COUNTDOWN):
             game_over = True
 
-        active_obs = 0
-        for obs in obstacles:
-            if obs.active:
-                active_obs += 1
-
         if active_obs == 0:
             game_over = True
-    won = lives > 0
+
+    won = lives > 0 and active_obs == 0
 
     # ---- 3. DISEGNA ----------------------------------------------- #
 
@@ -268,7 +272,6 @@ while running:
     # TODO — Chiama draw_hud(), draw_timer_bar(), paddle.draw(),
     # ball.draw() nell'ordine corretto.
     # Se game_over è True, chiama anche draw_end_screen(screen, won).
-    remaining = time_remaining(start_time, COUNTDOWN)
 
     draw_hud(screen, remaining, lives)
     draw_timer_bar(screen, remaining, COUNTDOWN)
