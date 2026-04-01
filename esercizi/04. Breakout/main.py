@@ -1,3 +1,5 @@
+from random import randint
+
 import pygame
 import sys
 import time
@@ -14,7 +16,7 @@ SCREEN_W  = 800
 SCREEN_H  = 600
 FPS       = 60
 
-COUNTDOWN = 120       # secondi per vincere
+COUNTDOWN = 60       # secondi per vincere
 MAX_LIVES =  3        # vite iniziali
 
 BG_COLOR      = ( 20,  20,  40)
@@ -71,8 +73,6 @@ def is_expired(start: float, duration: int) -> bool:
 
 def draw_hud(surface: pygame.Surface, remaining: float, lives: int):
     """
-    TODO — Disegna il HUD (heads-up display) in cima allo schermo.
-
     Deve mostrare:
     1. Il timer: il numero di secondi rimanenti, centrato in alto.
        Usa font_medium e TEXT_COLOR.
@@ -106,7 +106,6 @@ def draw_hud(surface: pygame.Surface, remaining: float, lives: int):
 def draw_timer_bar(surface: pygame.Surface,
                    remaining: float, duration: int):
     """
-    TODO — Disegna la barra del timer sotto il testo del countdown.
     Riusa la logica della tappa 3:
       - Sfondo: Rect(50, 48, SCREEN_W - 100, 10), colore (80, 40, 40)
       - Riempimento: larghezza proporzionale a remaining/duration,
@@ -134,8 +133,8 @@ def draw_end_screen(surface: pygame.Surface, won: bool):
 def create_obstacle():
     obstacles = []
 
-    rows = 4
-    cols = 10
+    rows = 5
+    cols = 11
     margin_top = 80
     spacing = 4
     height = 25
@@ -143,13 +142,16 @@ def create_obstacle():
     total_spacing = (cols + 1) * spacing
     width = (SCREEN_W - total_spacing) // cols
 
+    col_has_special = [False] * cols
     for row in range(rows):
         color = (220 - (row * 30), 100 + (row * 20), 80)
         for col in range(cols):
             x = spacing + col * (width + spacing)
             y = margin_top + row * (height + spacing)
-
-            obs = Obstacle((x, y), color, (width, height))
+            special = randint(0, 100) > 90 and not col_has_special[col]
+            if special:
+                col_has_special[col] = True
+            obs = Obstacle((x, y), color, (width, height), special)
             obstacles.append(obs)
 
     return obstacles
@@ -185,7 +187,6 @@ def reset_game():
 # LOOP PRINCIPALE                                                      #
 # ------------------------------------------------------------------ #
 
-# TODO — Chiama reset_game() per ottenere lo stato iniziale.
 # Decomponi la tupla restituita in quattro variabili:
 #   ball, paddle, start_time, lives = reset_game()
 #
@@ -201,7 +202,6 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        # TODO — Gestisci il tasto R per rigiocare:
         # se game_over è True e viene premuto pygame.K_r,
         # chiama reset_game() e reimposta tutte le variabili di stato,
         # incluso game_over = False.
@@ -212,7 +212,6 @@ while running:
 
     # ---- 2. AGGIORNA ---------------------------------------------- #
 
-    # TODO — Se game_over è False:
     #
     # a) Leggi i tasti con pygame.key.get_pressed() e chiama
     #    paddle.update(keys).
@@ -247,7 +246,7 @@ while running:
 
         for obs in obstacles:
             if obs.active and ball.ball_rect.colliderect(obs.rect):
-                obs.hit()
+                start_time = obs.hit(start_time)
                 ball.vel_y = -ball.vel_y
                 break
 
@@ -269,7 +268,6 @@ while running:
 
     screen.fill(BG_COLOR)
 
-    # TODO — Chiama draw_hud(), draw_timer_bar(), paddle.draw(),
     # ball.draw() nell'ordine corretto.
     # Se game_over è True, chiama anche draw_end_screen(screen, won).
 
