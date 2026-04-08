@@ -1,8 +1,11 @@
 class Hole:
     """Un singolo buco della griglia."""
 
-    # TODO: definire un costruttore che inizializzi lo stato (is_active) a False
-    # TODO: definire un metodo 'toggle' per invertire lo stato (is_active)
+    def __init__(self) -> None:
+        self.is_active = False
+
+    def toggle(self) -> None:
+        self.is_active = not self.is_active
 
 
 class GameModel:
@@ -10,5 +13,11 @@ class GameModel:
 
     NUM_HOLES = 9
 
-    # TODO: definire un costruttore che inizializzi una lista di 'NUM_HOLES' buchi
-    # TODO: definire un metodo 'toggle_hole(index)' per invocare il toggle del buco corrispondente (con validazione)
+    def __init__(self) -> None:
+        self.holes = [Hole() for _ in range(GameModel.NUM_HOLES)]
+
+    def toggle_hole(self, index: int) -> None:
+        if 0 <= index < GameModel.NUM_HOLES:
+            self.holes[index].toggle()
+        else:
+            print(f"\nIndice {index} non trovato.\n")
